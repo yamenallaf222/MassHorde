@@ -61,7 +61,7 @@ int32 UMassHordeWorldSubsystem::RetrievePooledEntities(const int32 Count, TArray
 		FMassEntityHandle Entity = PooledEntities.Pop(EAllowShrinking::No);
 		if (!Entity.IsValid()) continue;
 		
-		Out.Add(PooledEntities[i]);
+		Out.Add(Entity);
 	}
 	
 	return Available;
@@ -191,6 +191,9 @@ void UMassHordeWorldSubsystem::ProcessPendingSpawns()
 		
 		if (Reused < ThisBatch)
 		{
+			if (GetLiveCount() + Need > Settings->MaxLiveSpawnsCount)
+				return;
+
 			TArray<FMassEntityHandle> Spawned;
 			Spawner->SpawnEntities(*SpawnRequest.EntityTemplate, Need, Spawned);
 			NewEntities.Append(Spawned);

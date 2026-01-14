@@ -48,11 +48,8 @@ void UMassHordeSpawnProcessor::Execute(FMassEntityManager &EntityManager,
         return;
 
     SpawnRequest.EntityTemplate = HordeTemplate;
-    SpawnRequest.RemainingCount = 1;
+    SpawnRequest.RemainingCount = 128;
     // SpawnRequest.SpawnTransform = ;
-
-    if (Subsystem->GetLiveCount() + SpawnRequest.RemainingCount > Settings->MaxLiveSpawnsCount)
-        return;
 
     Subsystem->EnqueueSpawn(SpawnRequest);
 
