@@ -20,7 +20,8 @@ public class MassHorde : ModuleRules
 			"MassCrowd",
 			"MassLOD",
 			"DeveloperSettings",
-			"StructUtils"
+			"StructUtils",
+			"NavigationSystem"
         });
 
 		PrivateDependencyModuleNames.AddRange(new string[] {  });

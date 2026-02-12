@@ -35,6 +35,7 @@ void UMassHordeDeathProcessor::Execute(FMassEntityManager& EntityManager, FMassE
 		{
 			if (ChunkHealthFragments[i].CurrentHealth <= 0)
 			{
+				//GEngine->AddOnScreenDebugMessage(0, 3, FColor::Red, FString::Printf(TEXT(" current health %d"), ChunkHealthFragments[i].CurrentHealth));
 				FMassEntityHandle EntityHandle = SubContext.GetEntity(i);
 				Subsystem->EnqueueEntityToPool(EntityHandle, SubContext);
 			}

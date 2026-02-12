@@ -6,8 +6,9 @@
 #include "MassEntityTemplate.h"
 #include "Data/MassHordeDebugData.h"
 #include "Subsystems/WorldSubsystem.h"
+#include "Data/EssentialSystemData.h"
+#include "Mass/Fragments/MassHordeFragments.h"
 #include "MassHordeWorldSubsystem.generated.h"
-
 /**
  *
  */
@@ -16,16 +17,6 @@ class UMassEntityConfigAsset;
 struct FMassEntityHandle;
 struct FMassEntityManager;
 
-USTRUCT()
-struct MASSHORDE_API FMassHordeSpawnRequest
-{
-	GENERATED_BODY()
-	
-	FTransform SpawnTransform = FTransform::Identity;
-	const FMassEntityTemplate* EntityTemplate = nullptr;
-	int32 RemainingCount = 0;
-	
-};
 
 UCLASS()
 class MASSHORDE_API UMassHordeWorldSubsystem : public UWorldSubsystem
@@ -37,9 +28,12 @@ public:
 	void InitDebugData();
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
 	virtual void Deinitialize() override;
+	
+	//Getters
 	int32 RetrievePooledEntities(int32 Count, TArray<FMassEntityHandle>& Out);
 	int32 GetPooledCount() const;
 	int32 GetLiveCount() const;
+	FORCEINLINE const FMassHordeSharedFragment* GetHordeSharedFragment() const;
 
 	void SpawnRoutine();
 	void InitializeSpawnRoutine();
@@ -47,18 +41,24 @@ public:
 	const FMassEntityTemplate* GetHordeEntityTemplate() const;
 	virtual void OnWorldBeginPlay(UWorld& InWorld) override;
 
-
 	void UnregisterHordeEntity(const FMassEntityHandle& Entity);
 	void RegisterHordeEntity(const FMassEntityHandle& Entity);
 	void EnqueueEntityToPool(const FMassEntityHandle& Entity, const FMassExecutionContext& Context); 
 	void EnqueueSpawn(const FMassHordeSpawnRequest& SpawnRequest);
 
+	
+	FORCEINLINE FMassHordeSharedFragment* GetMutableHordeSharedFragment();
 
 private:
 	
 	void InitializeEntityManager();
 	void ProcessPendingSpawns();
+	void ConfigureNewEntities(TArray<FMassEntityHandle>& NewEntities);
 	void InitialSpawn() const;
+	
+	
+	//Shared Fragment accross the horde
+	FMassHordeSharedFragment* HordeSharedFragment;
 	
 	UPROPERTY()
 	UMassEntityConfigAsset* HordeConfig = nullptr;

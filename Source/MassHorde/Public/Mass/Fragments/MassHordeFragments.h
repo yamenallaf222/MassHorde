@@ -11,6 +11,7 @@
  */
 
 USTRUCT() struct MASSHORDE_API FMassHordeWildlingTag : public FMassTag { GENERATED_BODY() };
+USTRUCT() struct MASSHORDE_API FPlayerVisible : public FMassTag { GENERATED_BODY() };
 USTRUCT() struct MASSHORDE_API FEntityDeadAndPooledTag : public FMassTag { GENERATED_BODY() };
 USTRUCT() struct MASSHORDE_API FMovingTag : public FMassTag { GENERATED_BODY() };
 
@@ -20,16 +21,16 @@ struct FHealthFragment : public FMassFragment
 {
 	GENERATED_BODY()
 	
-	int32 CurrentHealth = 0;
+	float CurrentHealth;
 };
 
 
 
 USTRUCT()
-struct FMassHordeConstSharedFragment : public FMassConstSharedFragment
+struct FMassHordeSharedFragment : public FMassSharedFragment
 {
 	GENERATED_BODY()
 	
-	
+	FVector PlayerLocation;
 	
 };

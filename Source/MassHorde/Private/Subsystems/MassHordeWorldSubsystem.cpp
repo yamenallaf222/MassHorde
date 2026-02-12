@@ -10,13 +10,17 @@
 #include "MassSpawnerSubsystem.h"
 #include "Data/MassHordeDeveloperSettings.h"
 #include "Utilities/MassHordeUtility.h"
+#include "NavigationSystem.h"
+#ifdef WITH_EDITOR
+#include "DrawDebugHelpers.h"
+#endif
 
 
 
 void UMassHordeWorldSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
 	Super::Initialize(Collection);
-	
+		
 	InitializeEntityManager();
 	InitTemplateConfigs();
 	
@@ -77,6 +81,26 @@ int32 UMassHordeWorldSubsystem::GetLiveCount() const
 	return WorldEntities.Num();
 }
 
+FORCEINLINE const FMassHordeSharedFragment* UMassHordeWorldSubsystem::GetHordeSharedFragment() const
+{
+	if (HordeSharedFragment)
+	{
+		return HordeSharedFragment;
+	}
+	
+	return nullptr;
+}	
+
+FORCEINLINE FMassHordeSharedFragment* UMassHordeWorldSubsystem::GetMutableHordeSharedFragment()
+{
+	if (HordeSharedFragment)
+	{
+		return HordeSharedFragment;
+	}
+	
+	return nullptr;
+}
+
 void UMassHordeWorldSubsystem::SpawnRoutine()
 {
 	ProcessPendingSpawns();
@@ -111,6 +135,8 @@ void UMassHordeWorldSubsystem::OnWorldBeginPlay(UWorld& InWorld)
 {
 	Super::OnWorldBeginPlay(InWorld);
 	
+	HordeSharedFragment = new FMassHordeSharedFragment{};
+	
 	InitializeSpawnRoutine();
 	InitConfigTemplates(InWorld);
 	
@@ -139,7 +165,7 @@ void UMassHordeWorldSubsystem::EnqueueEntityToPool(const FMassEntityHandle& Enti
 	
 	if (Context.DoesArchetypeHaveTag<FMovingTag>())
 	{
-		Context.Defer().PushCommand<FMassCommandAddTag<FMovingTag>>(Entity);
+		Context.Defer().PushCommand<FMassCommandRemoveTag<FMovingTag>>(Entity);
 	}
 	
 	Context.Defer().PushCommand<FMassCommandAddTag<FEntityDeadAndPooledTag>>(Entity);
@@ -188,6 +214,7 @@ void UMassHordeWorldSubsystem::ProcessPendingSpawns()
 		TArray<FMassEntityHandle> NewEntities;
 		const int32 Reused = RetrievePooledEntities(ThisBatch, NewEntities);
 		const int32 Need = ThisBatch - Reused;
+
 		
 		if (Reused < ThisBatch)
 		{
@@ -195,15 +222,13 @@ void UMassHordeWorldSubsystem::ProcessPendingSpawns()
 				return;
 
 			TArray<FMassEntityHandle> Spawned;
+			
 			Spawner->SpawnEntities(*SpawnRequest.EntityTemplate, Need, Spawned);
+
 			NewEntities.Append(Spawned);
 			WorldEntities.Append(Spawned);
 		}
 		
-		for (int j = 0; j < NewEntities.Num(); ++j)
-		{
-			MassHordeUtility::ShowPassenger(*EntityManager, NewEntities[j], SpawnRequest.SpawnTransform.GetLocation());
-		}
 		
 		SpawnRequest.RemainingCount -= ThisBatch;
 		Budget -= ThisBatch;
@@ -212,8 +237,35 @@ void UMassHordeWorldSubsystem::ProcessPendingSpawns()
 		{
 			PendingSpawns.RemoveAtSwap(i);
 		}
+
+		ConfigureNewEntities(NewEntities);
+
 	}
 	
+}
+
+void UMassHordeWorldSubsystem::ConfigureNewEntities(TArray<FMassEntityHandle>& NewEntities)
+{
+	for (int j = 0; j < NewEntities.Num(); ++j)
+	{
+		if (FTransformFragment* TransformFragment = EntityManager->GetFragmentDataPtr<FTransformFragment>(NewEntities[j]))
+		{
+			FVector RandomLocation;
+			if (UNavigationSystemV1::K2_GetRandomReachablePointInRadius(GetWorld(), FVector::ZeroVector, RandomLocation, 1000.f))
+			{
+				RandomLocation.Z += 200.f;
+#ifdef WITH_EDITOR
+				DrawDebugPoint(GetWorld(), RandomLocation, 10.f, FColor::Red, true, -1.0f, MAX_uint8);
+#endif
+				TransformFragment->GetMutableTransform().SetLocation(RandomLocation);
+			}
+		}
+
+		if (FHealthFragment* HealthFragment = EntityManager->GetFragmentDataPtr<FHealthFragment>(NewEntities[j]))
+		{
+			HealthFragment->CurrentHealth = 100.f;
+		}
+	}
 }
 
 void UMassHordeWorldSubsystem::InitialSpawn() const
@@ -227,6 +279,21 @@ void UMassHordeWorldSubsystem::InitialSpawn() const
 	for (int i = 0; i < NewEntities.Num(); ++i)
 	{
 		FTransformFragment* EntityTransformFragmentPtr = EntityManager->GetFragmentDataPtr<FTransformFragment>(NewEntities[i]);
+		
+		FVector RandomLocation;
+		if (UNavigationSystemV1::K2_GetRandomReachablePointInRadius(GetWorld(), FVector::ZeroVector, RandomLocation, 1000.f))
+		{
+			RandomLocation.Z += 200.f;
+#ifdef WITH_EDITOR
+			DrawDebugPoint(GetWorld(), RandomLocation, 10.f, FColor::Red, true, -1.0f, MAX_uint8);
+#endif
+			EntityTransformFragmentPtr->GetMutableTransform().SetLocation(RandomLocation);
+		}		
+		
+		if (FHealthFragment* HealthFragment = EntityManager->GetFragmentDataPtr<FHealthFragment>(NewEntities[i]))
+		{
+			HealthFragment->CurrentHealth = 100.f;
+		}
 	}
 	
 }

@@ -32,5 +32,8 @@ public:
 	UPROPERTY(EditDefaultsOnly, Config, Category="Simulation Settings", meta=(ClampMin="1"))
 	float SpawnIntervalSeconds = 0.25f;
 	
+	UPROPERTY(EditDefaultsOnly, Config, Category="Simulation Settings", meta=(ClampMin="1", ClampMax="90"))
+	float EntitiesConeHalfAngle = 45.f;
+	
 	
 };

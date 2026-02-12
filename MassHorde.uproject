@@ -9,7 +9,7 @@
 			"Type": "Runtime",
 			"LoadingPhase": "Default",
 			"AdditionalDependencies": [
-				"Engine"
+				"MassEntity"
 			]
 		}
 	],
@@ -37,21 +37,6 @@
 		{
 			"Name": "MassEntity",
 			"Enabled": true
-		},
-		{
-			"Name": "VisualStudioTools",
-			"Enabled": true,
-			"SupportedTargetPlatforms": [
-				"Win64"
-			]
-		},
-		{
-			"Name": "RiderSourceCodeAccess",
-			"Enabled": false
-		},
-		{
-			"Name": "RiderLink",
-			"Enabled": false
 		}
 	]
 }

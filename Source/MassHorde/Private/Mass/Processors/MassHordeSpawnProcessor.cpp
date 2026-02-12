@@ -7,12 +7,13 @@
 #include "MassExecutionContext.h"
 #include "MassMovementFragments.h"
 #include "Mass/Fragments/MassHordeFragments.h"
+#include "Data/EssentialSystemData.h"
 #include "Subsystems/MassHordeWorldSubsystem.h"
 
 UMassHordeSpawnProcessor::UMassHordeSpawnProcessor() : SpawnEntityQuery(*this)
 {
     ExecutionFlags = static_cast<int32>(EProcessorExecutionFlags::All);
-    ProcessingPhase = EMassProcessingPhase::FrameEnd;
+    ProcessingPhase = EMassProcessingPhase::PrePhysics;
     ExecutionOrder.ExecuteInGroup = UE::Mass::ProcessorGroupNames::Tasks;
 }
 
@@ -49,7 +50,8 @@ void UMassHordeSpawnProcessor::Execute(FMassEntityManager &EntityManager,
 
     SpawnRequest.EntityTemplate = HordeTemplate;
     SpawnRequest.RemainingCount = 128;
-    // SpawnRequest.SpawnTransform = ;
+
+    //GEngine->AddOnScreenDebugMessage(0, 1.0f, FColor::Green, RandomTransform.ToString());    
 
     Subsystem->EnqueueSpawn(SpawnRequest);
 
