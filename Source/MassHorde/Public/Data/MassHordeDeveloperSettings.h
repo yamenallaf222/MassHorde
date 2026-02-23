@@ -35,5 +35,29 @@ public:
 	UPROPERTY(EditDefaultsOnly, Config, Category="Simulation Settings", meta=(ClampMin="1", ClampMax="90"))
 	float EntitiesConeHalfAngle = 45.f;
 	
+	UPROPERTY(EditDefaultsOnly, Config, Category="Debugging Settings")
+	bool bGlobalMassSystemDebugging = true;
+	
+	UPROPERTY(EditDefaultsOnly, Config, Category="Debugging Settings")
+	bool bDebugVisionCones = true;
+	
+	UPROPERTY(EditDefaultsOnly, Config, Category="Debugging Settings")
+	bool bDebugSpawnPosition = true;
+	
+	UPROPERTY(EditDefaultsOnly, Config, Category="Debugging Settings")
+	bool bDebugMovementVectors = true;
+	
+	// Movement Settings
+	UPROPERTY(EditDefaultsOnly, Config, Category="Movement Settings", meta=(ClampMin="0.0"))
+	float EntityMaxSpeed = 400.f;
+	
+	UPROPERTY(EditDefaultsOnly, Config, Category="Movement Settings", meta=(ClampMin="0.0"))
+	float EntityAcceleration = 800.f;
+	
+	UPROPERTY(EditDefaultsOnly, Config, Category="Movement Settings", meta=(ClampMin="0.0"))
+	float EntityStoppingDistance = 150.f;
+	
+	UPROPERTY(EditDefaultsOnly, Config, Category="Movement Settings", meta=(ClampMin="0.0"))
+	float EntityTurnSpeed = 5.f;
 	
 };

@@ -4,22 +4,23 @@
 
 #include "CoreMinimal.h"
 #include "MassProcessor.h"
-#include "MassHordeMoveProcessors.generated.h"
+#include "MassHordeMovementDataPropagatorProcessor.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class MASSHORDE_API UMassHordeMoveProcessor : public UMassProcessor
+class MASSHORDE_API UMassHordeMovementDataPropagatorProcessor : public UMassProcessor
 {
 	GENERATED_BODY()
 	
 public:
-	UMassHordeMoveProcessor();
+	UMassHordeMovementDataPropagatorProcessor();
 	
 protected:
 	virtual void ConfigureQueries(const TSharedRef<FMassEntityManager>& EntityManager) override;
 	virtual void Execute(FMassEntityManager& EntityManager, FMassExecutionContext& Context) override;
-
-	FMassEntityQuery EntityQuery;
+	
+private:
+	FMassEntityQuery MovementDataPropagatorQuery;
 };

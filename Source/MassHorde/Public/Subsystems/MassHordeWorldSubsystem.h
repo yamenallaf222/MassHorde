@@ -53,8 +53,8 @@ private:
 	
 	void InitializeEntityManager();
 	void ProcessPendingSpawns();
-	void ConfigureNewEntities(TArray<FMassEntityHandle>& NewEntities);
-	void InitialSpawn() const;
+	void ConfigureNewEntities(TArray<FMassEntityHandle>& NewEntities, const bool& bDebugEnabled);
+	void InitialSpawn();
 	
 	
 	//Shared Fragment accross the horde

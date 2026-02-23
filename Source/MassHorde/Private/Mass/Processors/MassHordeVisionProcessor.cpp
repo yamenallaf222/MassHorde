@@ -39,14 +39,14 @@ FORCEINLINE bool UMassHordeVisionProcessor::VisionConeCheck(const FVector& Direc
 #ifdef WITH_EDITOR
 bool UMassHordeVisionProcessor::DebuggedVisionConeCheck(const FVector& DirectionToPlayer, const FVector& EntityForward, const float& ConeHalfAngle, const FVector& DebugEntityLocation) const
 {
-	bool PlayerSeen = false;
+	bool bPlayerSeen = false;
 	float AngleRadians = FMath::DegreesToRadians(ConeHalfAngle);
 	
 	if (FVector::DotProduct(DirectionToPlayer, EntityForward) >= FMath::Cos(AngleRadians))
-		PlayerSeen = true;
+		bPlayerSeen = true;
 	
 	
-	FColor DebugColor = !PlayerSeen ? FColor::Red : FColor::Green;
+	FColor DebugColor = !bPlayerSeen ? FColor::Red : FColor::Green;
 	
 	/*
 	 * @todo please change the hardcodded Cone Length param to Developer Settings value one
@@ -54,7 +54,9 @@ bool UMassHordeVisionProcessor::DebuggedVisionConeCheck(const FVector& Direction
 	DrawDebugCone(GetWorld(), DebugEntityLocation, EntityForward, 1000.f, /* half angle cone here*/ AngleRadians, AngleRadians,
 		8, DebugColor, false, 3.f, MAX_uint8, 2.f);
 	
-	return PlayerSeen;
+	GEngine->AddOnScreenDebugMessage(0, 2.f, bPlayerSeen ? FColor::Green : FColor::Red, bPlayerSeen ? TEXT("Player Seen") : TEXT("Player is not seen"));
+	
+	return bPlayerSeen;
 }
 #endif
 
@@ -79,20 +81,21 @@ void UMassHordeVisionProcessor::Execute(FMassEntityManager& EntityManager, FMass
 
 			for (int i = 0; i < SubContextEntityCount; i++)
 			{
-				const FTransform EntityTransform = TransformFragmentView[i].GetTransform();
+				const FTransform& EntityTransform = TransformFragmentView[i].GetTransform();
 
-				const FVector EntityForward = EntityTransform.GetRotation().GetForwardVector().GetSafeNormal();
-				const FVector EntityDirectionToPlayer = (HordeSharedFragment->PlayerLocation - EntityTransform.GetLocation()).GetSafeNormal();
+				const FVector& EntityForward = EntityTransform.GetRotation().GetForwardVector().GetSafeNormal();
+				const FVector& EntityDirectionToPlayer = (HordeSharedFragment->PlayerLocation - EntityTransform.GetLocation()).GetSafeNormal();
 
-				bool PlayerSeen =
+				bool bPlayerSeen =
 #ifdef WITH_EDITOR
-					DebuggedVisionConeCheck(EntityDirectionToPlayer, EntityForward, MassHordeDeveloperSettings->EntitiesConeHalfAngle, EntityTransform.GetLocation());
+					MassHordeDeveloperSettings->bDebugVisionCones ? DebuggedVisionConeCheck(EntityDirectionToPlayer, EntityForward,
+						MassHordeDeveloperSettings->EntitiesConeHalfAngle, EntityTransform.GetLocation()) : VisionConeCheck(EntityDirectionToPlayer, EntityForward, MassHordeDeveloperSettings->EntitiesConeHalfAngle); 
 #else
 					VisionConeCheck(EntityDirectionToPlayer, EntityForward, MassHordeDeveloperSettings->EntitiesConeHalfAngle);
 #endif
 	
 				// it is safe to call remove the tag even if the entity does not have it as Mass Framework handles this case
-				PlayerSeen ? Context.Defer().PushCommand<FMassCommandAddTag<FPlayerVisible>>(SubContext.GetEntity(i)) :
+				bPlayerSeen ? Context.Defer().PushCommand<FMassCommandAddTag<FPlayerVisible>>(SubContext.GetEntity(i)) :
 					Context.Defer().PushCommand<FMassCommandRemoveTag<FPlayerVisible>>(SubContext.GetEntity(i));
 			}			
 		});

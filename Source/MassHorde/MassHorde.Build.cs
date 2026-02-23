@@ -16,9 +16,11 @@ public class MassHorde : ModuleRules
 			"MassMovement", 
 			"MassSpawner", 
 			"MassRepresentation",
+			"MassActors",  // Required for FMassActorFragment and actor visualization
 			"MassNavigation",
 			"MassCrowd",
 			"MassLOD",
+			"MassGameplayDebug",  // For debug visualization traits
 			"DeveloperSettings",
 			"StructUtils",
 			"NavigationSystem"

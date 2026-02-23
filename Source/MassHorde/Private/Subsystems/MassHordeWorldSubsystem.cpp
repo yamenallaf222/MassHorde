@@ -202,6 +202,8 @@ void UMassHordeWorldSubsystem::ProcessPendingSpawns()
 	
 	if (!Settings) return;
 	
+	bool bDebugEnabled = Settings->bGlobalMassSystemDebugging & Settings->bDebugSpawnPosition;
+	
 	if (!Spawner || !MassEntitySubsystem) return;
 	int32 Budget = Settings->MaxSpawnsPerFrame;
 	
@@ -238,13 +240,14 @@ void UMassHordeWorldSubsystem::ProcessPendingSpawns()
 			PendingSpawns.RemoveAtSwap(i);
 		}
 
-		ConfigureNewEntities(NewEntities);
+		
+		ConfigureNewEntities(NewEntities, bDebugEnabled);
 
 	}
 	
 }
 
-void UMassHordeWorldSubsystem::ConfigureNewEntities(TArray<FMassEntityHandle>& NewEntities)
+void UMassHordeWorldSubsystem::ConfigureNewEntities(TArray<FMassEntityHandle>& NewEntities, const bool& bDebugEnabled)
 {
 	for (int j = 0; j < NewEntities.Num(); ++j)
 	{
@@ -255,7 +258,7 @@ void UMassHordeWorldSubsystem::ConfigureNewEntities(TArray<FMassEntityHandle>& N
 			{
 				RandomLocation.Z += 200.f;
 #ifdef WITH_EDITOR
-				DrawDebugPoint(GetWorld(), RandomLocation, 10.f, FColor::Red, true, -1.0f, MAX_uint8);
+				if (bDebugEnabled) DrawDebugPoint(GetWorld(), RandomLocation, 10.f, FColor::Red, true, -1.0f, MAX_uint8);
 #endif
 				TransformFragment->GetMutableTransform().SetLocation(RandomLocation);
 			}
@@ -268,32 +271,16 @@ void UMassHordeWorldSubsystem::ConfigureNewEntities(TArray<FMassEntityHandle>& N
 	}
 }
 
-void UMassHordeWorldSubsystem::InitialSpawn() const
+void UMassHordeWorldSubsystem::InitialSpawn()
 {
 	auto* Spawner = GetWorld()->GetSubsystem<UMassSpawnerSubsystem>();
+	const auto* Settings = GetDefault<UMassHordeDeveloperSettings>();
+	if (!Settings) return;
 	
 	TArray<FMassEntityHandle> NewEntities;
 	Spawner->SpawnEntities(HordeTemplate, 1, NewEntities);
 	
 	
-	for (int i = 0; i < NewEntities.Num(); ++i)
-	{
-		FTransformFragment* EntityTransformFragmentPtr = EntityManager->GetFragmentDataPtr<FTransformFragment>(NewEntities[i]);
-		
-		FVector RandomLocation;
-		if (UNavigationSystemV1::K2_GetRandomReachablePointInRadius(GetWorld(), FVector::ZeroVector, RandomLocation, 1000.f))
-		{
-			RandomLocation.Z += 200.f;
-#ifdef WITH_EDITOR
-			DrawDebugPoint(GetWorld(), RandomLocation, 10.f, FColor::Red, true, -1.0f, MAX_uint8);
-#endif
-			EntityTransformFragmentPtr->GetMutableTransform().SetLocation(RandomLocation);
-		}		
-		
-		if (FHealthFragment* HealthFragment = EntityManager->GetFragmentDataPtr<FHealthFragment>(NewEntities[i]))
-		{
-			HealthFragment->CurrentHealth = 100.f;
-		}
-	}
+	ConfigureNewEntities(NewEntities, Settings->bGlobalMassSystemDebugging & Settings->bDebugSpawnPosition);
 	
 }
